@@ -57,16 +57,10 @@ public class PlayerRenderer extends JPanel implements ListCellRenderer<PlayerInf
         private static final Border MARGIN = new EmptyBorder(1, 5, 1, 5);
 
         public Tag(PlayerTag tag) {
-            setIcon(UIUtils.getIcon("close"));
+            super(tag.name);
             setOpaque(true);
-
-            setTag(tag);
-        }
-
-        public void setTag(PlayerTag tag) {
             setBorder(new CompoundBorder(BorderFactory.createLineBorder(tag.color), MARGIN));
             setBackground(new Color(tag.color.getRGB() + ALPHA, true));
-            setText(tag.name);
         }
     }
 
