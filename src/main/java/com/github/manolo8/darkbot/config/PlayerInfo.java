@@ -21,7 +21,7 @@ public class PlayerInfo {
     }
 
     public void setTag(PlayerTag tag, Long until) {
-        subscriptions.put(tag, until);
+        subscriptions.put(tag, until == null ? -1 : until);
     }
 
     public void removeTag(PlayerTag tag) {
@@ -30,7 +30,7 @@ public class PlayerInfo {
 
     public boolean hasTag(PlayerTag tag) {
         Long until = subscriptions.get(tag);
-        if (until != null && until > System.currentTimeMillis()) return true;
+        if (until != null && (until == -1 || until > System.currentTimeMillis())) return true;
         subscriptions.remove(tag);
         return false;
     }
@@ -41,8 +41,9 @@ public class PlayerInfo {
 
     public boolean filter(String string) {
         return string == null
-                || username.toLowerCase(Locale.ROOT).contains(string.toLowerCase(Locale.ROOT))
-                || String.valueOf(userId).contains(string);
+                || username.toLowerCase(Locale.ROOT).contains(string)
+                || String.valueOf(userId).contains(string)
+                || getTags().stream().anyMatch(tag -> tag.name.toLowerCase(Locale.ROOT).contains(string));
     }
 
     @Override

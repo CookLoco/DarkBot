@@ -4,6 +4,8 @@ import com.github.manolo8.darkbot.config.types.Editor;
 import com.github.manolo8.darkbot.config.types.Num;
 import com.github.manolo8.darkbot.config.types.Option;
 import com.github.manolo8.darkbot.config.types.Options;
+import com.github.manolo8.darkbot.config.types.Tag;
+import com.github.manolo8.darkbot.config.types.TagDefault;
 import com.github.manolo8.darkbot.config.types.suppliers.LanguageSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ReviveSpotSupplier;
@@ -11,13 +13,16 @@ import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.tree.components.JActionTable;
 import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
+import com.github.manolo8.darkbot.gui.tree.components.JFileOpener;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
 import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
+import com.github.manolo8.darkbot.gui.tree.components.JPlayerTagField;
 import com.github.manolo8.darkbot.gui.tree.components.LangEditor;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Map;
@@ -35,7 +40,7 @@ public class Config {
     // DEFINED AREAS
 
     public Map<Integer, PlayerInfo> PLAYER_INFOS = new HashMap<>();
-    public Map<String, PlayerTag> PLAYER_TAGS = new HashMap<>();
+    public Set<PlayerTag> PLAYER_TAGS = new HashSet<>();
     public transient Lazy<Integer> PLAYER_UPDATED = new Lazy.NoCache<>();
 
     public Queue<UnresolvedPlayer> UNRESOLVED = new LinkedList<>();
@@ -140,7 +145,10 @@ public class Config {
     public @Option GroupSettings GROUP = new GroupSettings();
     public static class GroupSettings {
         public @Option boolean ACCEPT_INVITES = false;
-        public /*@Option*/ boolean WHITELIST_INVITES = false; // TODO: make it an option
+        public @Option @Editor(JPlayerTagField.class) @Tag(TagDefault.ALL) PlayerTag WHITELIST_TAG = null;
+        public @Option @Editor(JPlayerTagField.class) @Tag(TagDefault.NONE) PlayerTag INVITE_TAG = null;
+        public @Option boolean OPEN_INVITES = false;
+        public @Option @Editor(JPlayerTagField.class) @Tag(TagDefault.NONE) PlayerTag KICK_TAG = null;
     }
 
     public @Option Miscellaneous MISCELLANEOUS = new Miscellaneous();

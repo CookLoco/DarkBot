@@ -10,10 +10,10 @@ import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 public class PlayerEditor extends JPanel {
     private JList<PlayerInfo> playerInfoList;
@@ -21,7 +21,11 @@ public class PlayerEditor extends JPanel {
     protected Main main;
 
     public PlayerEditor() {
-        super(new MigLayout("ins 0, gap 0, wrap 4, fill", "[][][grow][]", "[][grow]"));
+        super(new MigLayout("ins 0, gap 0, wrap 4, fill", "[][][grow][]", "[][grow,fill]"));
+    }
+
+    public void setup(Main main) {
+        this.main = main;
 
         add(new AddPlayer(), "grow");
         add(new AddId(), "grow");
@@ -32,22 +36,22 @@ public class PlayerEditor extends JPanel {
         playerInfoList.setSelectionBackground(UIUtils.ACTION);
         playerInfoList.setCellRenderer(new PlayerRenderer());
 
-        add(playerInfoList, "span 4, grow");
-    }
+        JScrollPane scroll = new JScrollPane(playerInfoList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+        add(scroll, "span, grow");
 
-    public void setup(Main main) {
-        this.main = main;
         main.config.PLAYER_INFOS.values().forEach(playersModel::addElement);
-        this.main.config.PLAYER_UPDATED.add(i -> refreshList(null));
+        main.config.PLAYER_UPDATED.add(i -> refreshList(null));
     }
 
     public void refreshList(String filter) {
         if (main == null) return;
+        String query = filter == null ? null : filter.toLowerCase(Locale.ROOT);
         playersModel.clear();
         main.config.PLAYER_INFOS
                 .values()
                 .stream()
-                .filter(pi -> pi.filter(filter))
+                .filter(pi -> pi.filter(query))
                 .sorted(Comparator.comparing(pi -> pi.username))
                 .forEach(playersModel::addElement);
     }
@@ -61,13 +65,12 @@ public class PlayerEditor extends JPanel {
         }
 
         if (tag == null) {
-            tag = createTag();
+            tag = PlayerTagUtils.createTag(this);
             if (tag == null) return;
+            main.config.PLAYER_TAGS.add(tag);
         }
 
-        for (PlayerInfo p : players) {
-            p.setTag(tag, null);
-        }
+        for (PlayerInfo p : players) p.setTag(tag, null);
         main.config.changed = true;
         playerInfoList.updateUI();
     }
@@ -85,17 +88,6 @@ public class PlayerEditor extends JPanel {
         playerInfoList.updateUI();
     }
 
-    public PlayerTag createTag() {
-        PlayerTag tag;
-        String name = JOptionPane.showInputDialog(this, "Tag name", "Add player tag", JOptionPane.QUESTION_MESSAGE);
-        if (name == null) return null;
-        Color color = JColorChooser.showDialog(this, "Tag color", null);
-        if (color == null) return null;
-        main.config.PLAYER_TAGS.put(name, tag = new PlayerTag(name, color));
-        main.config.changed = true;
-        return tag;
-    }
-
     public void deleteTag(PlayerTag tag) {
         if (tag == null) return;
         int result = JOptionPane.showConfirmDialog(this,
@@ -103,7 +95,7 @@ public class PlayerEditor extends JPanel {
                 "Are you sure?",
                 JOptionPane.YES_NO_OPTION);
         if (result == JOptionPane.YES_OPTION)
-            main.config.PLAYER_TAGS.remove(tag.name);
+            main.config.PLAYER_TAGS.remove(tag);
 
         for (PlayerInfo p : main.config.PLAYER_INFOS.values()) {
             p.removeTag(tag);

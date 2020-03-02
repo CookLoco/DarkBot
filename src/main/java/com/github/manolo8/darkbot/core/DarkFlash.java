@@ -6,8 +6,6 @@ import com.sun.jna.platform.win32.WinDef;
 public class DarkFlash extends AbstractDarkBotApi {
     private LoginData loginData;
 
-    protected volatile WinDef.HWND window;
-
     public DarkFlash(LoginData loginData) {
         this.loginData = loginData;
     }
@@ -89,24 +87,22 @@ public class DarkFlash extends AbstractDarkBotApi {
     }
 
     public static class LoginData {
-        private final String sv, sid, preloaderUrl, params, url;
+        private final String sid, url, preloaderUrl, params;
 
-        public LoginData(String sv, String sid, String preloaderUrl, String params, String url) {
-            this.sv = sv;
+        public LoginData(String sid, String url, String preloaderUrl, String params) {
             this.sid = sid;
+            this.url = url;
             this.preloaderUrl = preloaderUrl;
             this.params = params;
-            this.url = url;
         }
 
         @Override
         public String toString() {
             return "LoginData{" +
-                    "sv='" + sv + '\'' +
-                    ", sid='" + sid + '\'' +
+                    "sid='" + sid + '\'' +
+                    ", url='" + url + '\'' +
                     ", preloaderUrl='" + preloaderUrl + '\'' +
                     ", params='" + params + '\'' +
-                    ", url='" + url + '\'' +
                     '}';
         }
     }
