@@ -6,11 +6,19 @@
 
     <groupId>com.github.manolo8.darkbot</groupId>
     <artifactId>DarkBOT</artifactId>
-    <version>1.13.14-SNAPSHOT</version>
+    <version>1.13-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>jfrog</id>
+            <name>Jfrog Artifacts</name>
+            <url>https://oss.jfrog.org/artifactory/oss-snapshot-local/com/formdev/</url>
+        </repository>
+    </repositories>
 
     <dependencies>
 
@@ -21,10 +29,16 @@
         </dependency>
 
         <dependency>
-            <groupId>com.bulenkov</groupId>
-            <artifactId>darcula</artifactId>
-            <version>1.0.0</version>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>0.27</version>
         </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>com.jidesoft</groupId>-->
+<!--            <artifactId>jide-oss</artifactId>-->
+<!--            <version>3.6.18</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>com.miglayout</groupId>
@@ -35,6 +49,12 @@
         <dependency>
             <groupId>org.jgrapht</groupId>
             <artifactId>jgrapht-core</artifactId>
+            <version>1.3.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jgrapht</groupId>
+            <artifactId>jgrapht-io</artifactId>
             <version>1.3.0</version>
         </dependency>
 
@@ -69,29 +89,6 @@
                     <target>8</target>
                     <encoding>UTF-8</encoding>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>3.0.0-M1</version>
-                <executions>
-                    <execution>
-                        <id>hack-binary</id>
-                        <phase>clean</phase>
-                        <configuration>
-                            <file>${basedir}/lib/darcula.jar</file>
-                            <groupId>com.bulenkov</groupId>
-                            <artifactId>darcula</artifactId>
-                            <version>1.0.0</version>
-                            <packaging>jar</packaging>
-                            <generatePom>true</generatePom>
-                        </configuration>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
 
             <plugin>
@@ -154,7 +151,7 @@
                                 <option>-dontwarn</option>
                                 <option>-keepattributes Signature</option>
                                 <option>-keep class com.github.manolo8.** { *; }</option>
-                                <option>-keep class com.bulenkov.** { *; }</option>
+                                <option>-keep class com.formdev.** { *; }</option>
                                 <option>-keep class com.sun.jna.* { *; }</option>
                             </options>
                             <libs>

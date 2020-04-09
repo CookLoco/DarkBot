@@ -2,12 +2,11 @@ package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
-import com.github.manolo8.darkbot.config.PlayerInfo;
 import com.github.manolo8.darkbot.core.objects.Gui;
-import com.github.manolo8.darkbot.core.objects.swf.Dictionary;
-import com.github.manolo8.darkbot.core.objects.swf.group.Group;
-import com.github.manolo8.darkbot.core.objects.swf.group.GroupMember;
-import com.github.manolo8.darkbot.core.objects.swf.group.Invite;
+import com.github.manolo8.darkbot.core.objects.group.Group;
+import com.github.manolo8.darkbot.core.objects.group.GroupMember;
+import com.github.manolo8.darkbot.core.objects.group.Invite;
+import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +31,7 @@ public class GroupManager extends Gui {
     public boolean pinging; // If the pinging button is enabled & you're ready to ping
     public List<Invite> invites = new ArrayList<>();
 
-    private Dictionary inviteDict = new Dictionary();
+    private PairArray inviteDict = PairArray.ofDictionary(true);
 
     private long nextAction;
 
@@ -59,15 +58,8 @@ public class GroupManager extends Gui {
 
         pinging = API.readMemoryBoolean(groupAddress + 0x40);
         inviteDict.update(API.readMemoryLong(groupAddress + 0x48));
-        inviteDict.update();
 
-        synchronized (Main.UPDATE_LOCKER) {
-            if (invites.size() > inviteDict.size) invites = invites.subList(0, inviteDict.size);
-            for (int i = 0; i < inviteDict.size; i++) {
-                while (invites.size() <= i) invites.add(new Invite(main.hero));
-                invites.get(i).update(inviteDict.get(i).value);
-            }
-        }
+        inviteDict.sync(invites, () -> new Invite(main.hero), null);
     }
 
     public void tick() {
@@ -95,8 +87,7 @@ public class GroupManager extends Gui {
                 .filter(in -> in.incomming && (config.WHITELIST_TAG == null ||
                         config.WHITELIST_TAG.has(main.config.PLAYER_INFOS.get(in.inviter.id))))
                 .findFirst()
-                .ifPresent(inv -> pending = () ->
-                        clickBtn(MARGIN_WIDTH + INVITE_WIDTH, 0, HEADER_HEIGHT + BUTTON_HEIGHT, invites.indexOf(inv)));
+                .ifPresent(inv -> pending = () -> acceptInvite(inv));
     }
 
     public void tryOpenInvites() {
@@ -106,18 +97,24 @@ public class GroupManager extends Gui {
     }
 
     public void tryQueueSendInvite() {
-        if (pending != null || !canInvite() || config.INVITE_TAG == null) return;
+        /*if (pending != null || !canInvite() || config.INVITE_TAG == null) return;
 
         for (PlayerInfo value : configRoot.PLAYER_INFOS.values()) {
             if (!config.INVITE_TAG.has(value)) continue;
 
-            /*pending = () -> {
+            pending = () -> {
                 click(MARGIN_WIDTH + (INVITE_WIDTH / 2), HEADER_HEIGHT + getGroupHeight() - (BUTTON_HEIGHT / 2));
                 API.sendText(value.username);
                 click(MARGIN_WIDTH + INVITE_WIDTH + (BUTTON_WIDTH / 2), HEADER_HEIGHT + getGroupHeight() - (BUTTON_HEIGHT / 2));
-            };*/
+            };
             break;
-        }
+        }*/
+    }
+
+    public void acceptInvite(Invite inv) {
+        int idx = invites.indexOf(inv);
+        if (idx >= 0)
+            clickBtn(MARGIN_WIDTH + INVITE_WIDTH, 0, HEADER_HEIGHT + BUTTON_HEIGHT, idx);
     }
 
     public void kick(int id) {

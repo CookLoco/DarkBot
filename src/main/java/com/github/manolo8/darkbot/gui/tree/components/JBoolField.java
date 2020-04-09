@@ -12,7 +12,6 @@ public class JBoolField extends JCheckBox implements OptionEditor {
     private ConfigField field;
 
     public JBoolField() {
-        putClientProperty("ConfigTree", true);
         super.addChangeListener(e -> {
             if (field != null) field.set(this.isSelected());
         });
@@ -31,12 +30,7 @@ public class JBoolField extends JCheckBox implements OptionEditor {
     }
 
     @Override
-    public Dimension getPreferredSize() {
-        return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
-    }
-
-    @Override
     public Insets getInsets() {
-        return new Insets(0, 0, 0, 0);
+        return new Insets(0, -1, 0, 0);
     }
 }

@@ -12,6 +12,7 @@ import com.github.manolo8.darkbot.gui.utils.UIUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.stream.IntStream;
 
 public class JPlayerTagField extends JButton implements OptionEditor {
 
@@ -30,6 +31,7 @@ public class JPlayerTagField extends JButton implements OptionEditor {
             if (field != null) {
                 field.set(tag);
                 setEditing(tag);
+                JPlayerTagField.this.revalidate();
             }
         });
     }
@@ -52,7 +54,7 @@ public class JPlayerTagField extends JButton implements OptionEditor {
     private void setEditing(PlayerTag tag) {
         if (tag == null) {
             setText("(" + unset + ")");
-            setBorder(UIUtils.getBorder());
+            setBorder(null);
             setBackground(UIUtils.BACKGROUND);
         } else {
             setText(tag.name);
@@ -72,4 +74,8 @@ public class JPlayerTagField extends JButton implements OptionEditor {
         return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
     }
 
+    @Override
+    public boolean isDefaultButton() {
+        return false;
+    }
 }

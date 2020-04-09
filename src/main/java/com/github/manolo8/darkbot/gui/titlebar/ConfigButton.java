@@ -6,27 +6,17 @@ import com.github.manolo8.darkbot.utils.I18n;
 
 import java.awt.event.ActionEvent;
 
-public class ConfigButton extends TitleBarButton<MainGui> {
-
-    private boolean visible;
+public class ConfigButton extends TitleBarToggleButton<MainGui> {
 
     ConfigButton(MainGui frame) {
         super(UIUtils.getIcon("config"), frame);
-        frame.addConfigVisibilityListener(v -> {
-            visible = v;
-            setBackground();
-        });
+        frame.addConfigVisibilityListener(this::setSelected);
         setToolTipText(I18n.get("gui.config_button"));
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         frame.toggleConfig();
-    }
-
-    protected void setBackground() {
-        if (visible) setBackground(actionColor.darker());
-        else super.setBackground();
     }
 
 }

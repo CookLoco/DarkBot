@@ -63,6 +63,7 @@ public class BackpageManager extends Thread {
                 int waitTime = sidCheck();
                 sidLastUpdate = System.currentTimeMillis();
                 sidNextUpdate = sidLastUpdate + (int) (waitTime + waitTime * Math.random());
+                galaxyManager.initIfEmpty();
             }
 
             if (System.currentTimeMillis() > checkDrones) {
@@ -82,7 +83,7 @@ public class BackpageManager extends Thread {
             synchronized (main.pluginHandler.getBackgroundLock()) {
                 for (Task task : tasks) {
                     try {
-                        task.tick();
+                        task.tickTask();
                     } catch (Throwable e) {
                         main.featureRegistry.getFeatureDefinition(task)
                                 .getIssues()

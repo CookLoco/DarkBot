@@ -5,7 +5,6 @@ import com.github.manolo8.darkbot.utils.I18n;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,16 +44,11 @@ public class TabbedPane extends JPanel {
         current = tab;
         if (old != null) {
             remove(old.component);
-            old.setBackground();
         }
         add(tab.component, "grow");
-        tab.setBackground();
         revalidate();
         repaint();
     }
-
-    private static final Border UNSELECTED = UIUtils.getTabBorder(false),
-            SELECTED = UIUtils.getTabBorder(true);
 
     private class Tab extends MainButton {
 
@@ -69,11 +63,6 @@ public class TabbedPane extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             selectTab(this);
-        }
-
-        protected void setBackground() {
-            setBorder(current == this ? SELECTED : UNSELECTED);
-            super.setBackground();
         }
 
     }

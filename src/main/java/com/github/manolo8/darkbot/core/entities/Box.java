@@ -7,7 +7,9 @@ import static com.github.manolo8.darkbot.Main.API;
 
 public class Box extends Entity {
 
-    private long collectedUntil, reset = 0;
+    private long collectedUntil;
+    private int retries = 0;
+
     public String type;
 
     public BoxInfo boxInfo;
@@ -21,19 +23,27 @@ public class Box extends Entity {
     }
 
     public void setCollected() {
-        collectedUntil = System.currentTimeMillis() + reset;
-        reset += reset < 15_000 ? 3_000 : 120_000;
+        collectedUntil = System.currentTimeMillis() + getNextWait();
+        retries++;
+    }
+
+    public int getRetries() {
+        return retries;
+    }
+
+    public int getNextWait() {
+        return retries < 5 ? retries * 2_000 : (retries * 60_000);
     }
 
     @Override
     public void update(long address) {
         super.update(address);
 
-        if (traits.elements.length == 0) {
+        if (traits.size == 0) {
             boxInfo = new BoxInfo();
             return;
         }
-        long data = traits.elements[0];
+        long data = traits.get(0);
 
         data = API.readMemoryLong(data + 64);
         data = API.readMemoryLong(data + 32);

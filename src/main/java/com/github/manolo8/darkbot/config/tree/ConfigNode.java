@@ -12,6 +12,7 @@ import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
 import com.github.manolo8.darkbot.gui.utils.Strings;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
+import com.github.manolo8.darkbot.utils.StringQuery;
 
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
@@ -23,7 +24,8 @@ import java.util.Objects;
 import java.util.function.Function;
 
 public abstract class ConfigNode {
-    private final Parent parent;
+
+    protected final Parent parent;
     public final String name;
     public final String description;
     public final String key;
@@ -31,7 +33,7 @@ public abstract class ConfigNode {
     ConfigNode(Parent parent, String name, String description, String key, String field) {
         this.parent = parent;
         this.name = name;
-        this.description = description.isEmpty() ? description : null;
+        this.description = !description.isEmpty() ? description : null;
         this.key = !key.isEmpty() ? key
                 : parent == null ? field.toLowerCase(Locale.ROOT)
                 : parent.key == null ? null
@@ -47,6 +49,27 @@ public abstract class ConfigNode {
 
     public String getLongestSibling() {
         return parent.longestChild;
+    }
+
+    // Convenient for searching/filtering
+    public String convertToString() {
+        String n = I18n.getOrDefault(key, name);
+        String desc = I18n.getOrDefault(key + ".desc", description);
+
+        return (key != null ? key.substring(key.lastIndexOf(".") + 1) + " , " : "") +
+                (n != null ? n + " , " : "") +
+                (desc != null ? desc : "");
+    }
+
+    boolean isVisible(StringQuery query) {
+        if (match(query)) return true;
+        ConfigNode p = this;
+        while ((p = p.parent) != null) if (p.match(query)) return true;
+        return false;
+    }
+
+    protected boolean match(StringQuery query) {
+        return query.matches(convertToString());
     }
 
     static ConfigNode.Parent rootingFrom(Parent parent, String name, Object root, String baseKey) {
@@ -86,8 +109,13 @@ public abstract class ConfigNode {
                     .max(Comparator.comparingInt(String::length)).orElse(null);
             return this;
         }
+
+        boolean isVisible(StringQuery filter) {
+            return super.isVisible(filter) || Arrays.stream(children).anyMatch(n -> n.match(filter));
+        }
+
     }
-    
+
     public static class Leaf extends ConfigNode {
         public final ConfigField field;
 

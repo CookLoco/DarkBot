@@ -1,20 +1,15 @@
 package com.github.manolo8.darkbot.gui.components;
 
-import com.github.manolo8.darkbot.gui.utils.SimpleMouseListener;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
 
-public class MainButton extends JButton implements SimpleMouseListener, ActionListener {
+public class MainButton extends JButton implements ActionListener {
 
-    protected Color actionColor = UIUtils.ACTION;
-    protected Color def;
-
-    private boolean hovering, pressing;
+    protected Color actionColor; // Currently useless.
 
     public MainButton(String text) {
         this(null, text);
@@ -31,12 +26,8 @@ public class MainButton extends JButton implements SimpleMouseListener, ActionLi
     protected MainButton(Icon icon, String text, String description) {
         super(text, icon);
         putClientProperty("JButton.buttonType", "square");
-        setBorder(UIUtils.getBorder());
 
-        this.def = getBackground();
-        addMouseListener(this);
         addActionListener(this);
-        setBackground();
         if (description != null && !description.isEmpty()) setToolTipText(description);
     }
 
@@ -44,43 +35,12 @@ public class MainButton extends JButton implements SimpleMouseListener, ActionLi
     public void actionPerformed(ActionEvent e) {}
 
     @Override
-    public void mouseEntered(MouseEvent e) {
-        hovering = true;
-        setBackground();
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-        hovering = false;
-        setBackground();
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-        pressing = true;
-        setBackground();
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-        pressing = false;
-        setBackground();
-    }
-
-    public void setEnabled(boolean enabled) {
-        super.setEnabled(enabled);
-        setBackground();
-    }
-
-    @Override
     public Insets getInsets() {
         return UIUtils.getInsetConfig(getText() != null && !getText().isEmpty());
     }
 
-    protected void setBackground() {
-        if (isEnabled() && pressing) setBackground(actionColor.darker());
-        else if (isEnabled() && hovering) setBackground(actionColor);
-        else setBackground(def);
+    @Override
+    public boolean isDefaultButton() {
+        return false; // Avoid painting as blue & focused
     }
-
 }

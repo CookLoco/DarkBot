@@ -1,13 +1,20 @@
 package com.github.manolo8.darkbot.core.entities;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
+import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.objects.Clickable;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
-import com.github.manolo8.darkbot.core.objects.swf.VectorPtr;
+import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class Entity extends Updatable {
+
+    public Main main;
 
     public int id;
 
@@ -16,12 +23,14 @@ public class Entity extends Updatable {
 
     public boolean removed;
 
-    public VectorPtr traits;
+    public ObjArray traits;
+
+    public Map<String, Object> metadata;
 
     public Entity() {
         this.locationInfo = new LocationInfo(0);
         this.clickable = new Clickable();
-        this.traits = new VectorPtr(0);
+        this.traits = ObjArray.ofVector();
     }
 
     public Entity(int id) {
@@ -64,7 +73,7 @@ public class Entity extends Updatable {
         traits.update();
 
         for (int c = 0; c < traits.size; c++) {
-            long adr = traits.elements[c];
+            long adr = traits.get(c);
 
             int radius = API.readMemoryInt(adr + 40);
             int priority = API.readMemoryInt(adr + 44);
@@ -77,12 +86,31 @@ public class Entity extends Updatable {
         }
     }
 
-    public void added() {
+    public boolean hasEffect(EffectManager.Effect effect) {
+        return main != null && main.effectManager.hasEffect(this, effect);
+    }
+
+    public boolean hasEffect(int effect) {
+        return main != null && main.effectManager.hasEffect(this, effect);
+    }
+
+    public void added(Main main) {
+        this.main = main;
         removed = false;
     }
 
     public void removed() {
         removed = true;
+    }
+
+    public void setMetadata(String key, Object value) {
+        if (metadata == null) metadata = new HashMap<>();
+        this.metadata.put(key, value);
+    }
+
+    public Object getMetadata(String key) {
+        if (metadata == null) return null;
+        return this.metadata.get(key);
     }
 
     @Override

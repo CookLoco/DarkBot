@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.gui.tree.components;
 
-import com.bulenkov.iconloader.util.Gray;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
@@ -32,7 +31,7 @@ public class JRangeField extends JPanel implements OptionEditor {
             }
         });
         add(min);
-        add(new JLabel(" - "));
+        add(new javax.swing.JLabel(" - "));
         add(max);
     }
 
@@ -43,8 +42,6 @@ public class JRangeField extends JPanel implements OptionEditor {
                 return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
             }
         };
-        spinner.putClientProperty("ConfigTree", true);
-        spinner.setBorder(BorderFactory.createLineBorder(Gray._90));
         spinner.setEditor(new JSpinner.NumberEditor(spinner, "0%"));
         return spinner;
     }

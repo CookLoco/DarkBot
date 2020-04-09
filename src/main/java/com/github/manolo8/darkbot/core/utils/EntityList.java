@@ -1,13 +1,25 @@
 package com.github.manolo8.darkbot.core.utils;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.entities.*;
+import com.github.manolo8.darkbot.config.NpcInfo;
+import com.github.manolo8.darkbot.core.entities.Barrier;
+import com.github.manolo8.darkbot.core.entities.BasePoint;
+import com.github.manolo8.darkbot.core.entities.BattleStation;
+import com.github.manolo8.darkbot.core.entities.Box;
+import com.github.manolo8.darkbot.core.entities.Entity;
+import com.github.manolo8.darkbot.core.entities.FakeNpc;
+import com.github.manolo8.darkbot.core.entities.MapNpc;
+import com.github.manolo8.darkbot.core.entities.NoCloack;
+import com.github.manolo8.darkbot.core.entities.Npc;
+import com.github.manolo8.darkbot.core.entities.Portal;
+import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Obstacle;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
-import com.github.manolo8.darkbot.core.objects.swf.VectorPtr;
+import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,7 +30,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class EntityList extends Updatable {
 
     private final Main main;
-    private final VectorPtr entitiesAddress;
+    private final ObjArray entitiesAddress;
     public final List<List<? extends Entity>> allEntities;
     private final Set<Integer> ids;
 
@@ -33,11 +45,12 @@ public class EntityList extends Updatable {
     public final List<BattleStation> battleStations;
     public final List<BasePoint> basePoints;
     public final List<Entity> unknown;
+    public final FakeNpc fakeNpc;
 
     public EntityList(Main main) {
         this.main = main;
 
-        this.entitiesAddress = new VectorPtr(0);
+        this.entitiesAddress = ObjArray.ofVector();
         this.allEntities = new ArrayList<>();
 
         this.ids = new HashSet<>();
@@ -63,6 +76,7 @@ public class EntityList extends Updatable {
         this.allEntities.add(battleStations);
         this.allEntities.add(basePoints);
         this.allEntities.add(unknown);
+        this.fakeNpc = new FakeNpc(main);
 
         this.main.status.add(this::refreshRadius);
     }
@@ -74,6 +88,8 @@ public class EntityList extends Updatable {
             removeAllInvalidEntities();
 
             refreshEntities();
+
+            updatePing(main.mapManager.pingLocation, main.guiManager.pet.getTrackedNpc());
         }
 
     }
@@ -91,7 +107,7 @@ public class EntityList extends Updatable {
 
         entitiesAddress.update();
         for (int i = 0; i < entitiesAddress.size; i++) {
-            long found = entitiesAddress.elements[i];
+            long found = entitiesAddress.get(i);
 
             int id = API.readMemoryInt(found + 56);
             if (!ids.add(id)) continue;
@@ -106,11 +122,11 @@ public class EntityList extends Updatable {
                 noCloack.add(whenAdd(new NoCloack(id), found));
             } else if (id < 0 && rnd == 3) {
                 boxes.add(whenAdd(new Box(id), found));
-            } else if (150000156 <= id && id <= 150000526) {
+            } else if (150000156 <= id && id <= 150000582) {
                 LocationInfo loc = new LocationInfo(API.readMemoryLong(found + 64));
                 loc.update();
                 portals.add(whenAdd(main.starManager.getOrCreate(id, rnd, (int) loc.now.x, (int) loc.now.y), found));
-            } else if (150000532 <= id && id <= 150000950 && hullId < 255 && hullId >= 0) {
+            } else if (150000583 <= id && id <= 150000950 && hullId < 255 && hullId >= 0 && !main.hero.map.gg) {
                 battleStations.add(whenAdd(new BattleStation(id, hullId), found));
             } else if (id <= 150000147 && id >= 150000000) {
                 // 1-1: 000-022  1-4: 023
@@ -172,7 +188,7 @@ public class EntityList extends Updatable {
 
     private <E extends Entity> E whenAdd(E entity, long address) {
 
-        entity.added();
+        entity.added(main);
         entity.update(address);
         entity.update();
 
@@ -217,6 +233,14 @@ public class EntityList extends Updatable {
         }
     }
 
+    public void updatePing(Location location, NpcInfo info) {
+        fakeNpc.set(location, info);
+        boolean shouldBeNpc = info != null && fakeNpc.isPingAlive() && main.hero.locationInfo.distance(fakeNpc) > 1000;
+
+        if (!shouldBeNpc) npcs.remove(fakeNpc);
+        else if (!npcs.contains(fakeNpc)) npcs.add(fakeNpc);
+    }
+
     private void doInEachEntity(Consumer<Entity> consumer) {
         for (List<? extends Entity> entities : allEntities) {
             entities.forEach(consumer);
@@ -228,6 +252,7 @@ public class EntityList extends Updatable {
             ids.clear();
 
             obstacles.clear();
+            fakeNpc.removed();
 
             for (List<? extends Entity> entities : allEntities) {
                 for (Entity entity : entities) entity.removed();

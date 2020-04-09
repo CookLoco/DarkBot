@@ -2,16 +2,16 @@ package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.config.types.suppliers.OptionList;
 import com.github.manolo8.darkbot.core.entities.Portal;
-import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.utils.I18n;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,7 +28,9 @@ public class StarManager {
 
         StarBuilder mapBuild = new StarBuilder();
         mapBuild.addMap(-1, I18n.get("gui.map.loading"), "?")
-                .addMap(-2, "Home Map").addPortal(0, 0, "1-1").addPortal(0, 0, "2-1").addPortal(0, 0, "3-1");
+                .addMap(-2, "Home Map").addPortal(0, 0, "1-1").addPortal(0, 0, "2-1").addPortal(0, 0, "3-1")
+                .addGG(-3, "GG Escort").accessOnlyBy(54, 10500, 6500, /*"1-1", "2-1", "3-1",*/ "1-8", "2-8", "3-8") // Gotta "reserve" x-1 maps for GG eternal.
+                .addGG(-4, "GG Eternal").accessBy(54, 10500, 6500, HOME_MAPS);
                 // MMO
         mapBuild.addMap(1, "1-1").addPortal(18500, 11500, "1-2").addPortal(10500, 6750, "Experiment Zone 1")
                 .addMap(2, "1-2").addPortal(2000, 2000, "1-1").addPortal(18500, 2000, "1-3").addPortal(18500, 11500, "1-4")
@@ -140,32 +142,38 @@ public class StarManager {
                 .addMap(158, "R-Zone 9").addMap(159, "R-Zone 10")
                 .addMap(420, "WarGame 1").addMap(421, "WarGame 2").addMap(422, "WarGame 3")
                 .addMap(423, "WarGame 4").addMap(423, "WarGame 5").addMap(423, "WarGame 6");
-                // Winter laberynth
-        mapBuild.addMap(430, "ATLAS A")
-                .addMap(431, "ATLAS B")
-                .addMap(432, "ATLAS C")
-                .addMap(433, "Cygni")
-                .addMap(434, "Helvetios")
-                .addMap(435, "Eridani")
-                .addMap(436, "Sirius")
-                .addMap(437, "Sadatoni")
-                .addMap(438, "Persei")
-                .addMap(439, "Volantis")
-                .addMap(440, "Alcyone")
-                .addMap(441, "Auriga")
-                .addMap(442, "Bootes")
-                .addMap(443, "Aquila")
-                .addMap(444, "Orion")
-                .addMap(445, "Maia");
+                // Mimesis escort
+        mapBuild.addGG(430, "Escort VRU 1", "ESC-V1").exitBy(1)
+                .addGG(431, "Escort VRU 2", "ESC-V2").exitBy(1)
+                .addGG(432, "Escort VRU 3", "ESC-V3").exitBy(1)
+                .addGG(433, "Escort MMO 1", "ESC-M1").exitBy(1)
+                .addGG(434, "Escort MMO 2", "ESC-M2").exitBy(1)
+                .addGG(435, "Escort MMO 3", "ESC-M3").exitBy(1)
+                .addGG(436, "Escort EIC 1", "ESC-E1").exitBy(1)
+                .addGG(437, "Escort EIC 2", "ESC-E2").exitBy(1)
+                .addGG(438, "Escort EIC 3", "ESC-E3").exitBy(1)
+                .addGG(439, "Eternal Gate", "GG ∞")
+                .addGG(440, "Eternal Gate", "GG ∞")
+                .addGG(441, "Eternal Gate", "GG ∞")
+                .addGG(442, "Eternal Gate", "GG ∞")
+                .addGG(443, "Eternal Gate", "GG ∞")
+                .addGG(444, "Eternal Gate", "GG ∞")
+                .addGG(445, "Eternal Gate", "GG ∞");
 
         starSystem = mapBuild.build();
+
+        //org.jgrapht.io.DOTExporter<Map, Portal> exporter = new org.jgrapht.io.DOTExporter<>(m -> (m.id < 0 ? "00" : "") + Math.abs(m.id), Map::toString, Portal::toString);
+        //Writer writer = new StringWriter();
+        //exporter.exportGraph(starSystem, writer);
+        //System.out.println(writer.toString());
     }
 
     public Portal getOrCreate(int id, int type, int x, int y) {
         return starSystem.outgoingEdgesOf(HeroManager.instance.map).stream()
                 .filter(p -> p.matches(x, y, type))
                 .peek(p -> p.id = id)
-                .findAny().orElse(new Portal(id, type, x, y));
+                .findFirst()
+                .orElse(new Portal(id, type, x, y));
     }
 
     public Portal next(HeroManager hero, Map target) {

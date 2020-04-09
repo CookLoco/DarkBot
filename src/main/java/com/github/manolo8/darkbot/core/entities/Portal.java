@@ -36,22 +36,20 @@ public class Portal extends Entity {
 
         type = Main.API.readMemoryInt(address + 112);
         if (locationInfo.isMoving()) {
-            if (matcher == null) {
-
-            }
             ConfigEntity.INSTANCE.updateSafetyFor(this);
         }
     }
 
     @Override
-    public void added() {
-        super.added();
+    public void added(Main main) {
+        super.added(main);
         ConfigEntity.INSTANCE.updateSafetyFor(this);
     }
 
     @Override
     public String toString() {
-        return "(" + locationInfo.now + ")" + type;
+        if (!removed) return id + "(" + locationInfo.now + ")" + type;
+        else return "(" + matcher.searchX + "," + matcher.searchY + ")" + matcher.searchType;
     }
 
     // Holds the search criteria portals in the star manager
@@ -65,7 +63,7 @@ public class Portal extends Entity {
         }
 
         boolean matches(int x, int y, int type) {
-            return (searchType != 1 && searchType == type) || // By type
+            return (searchType != -1 && searchType == type) || // By type
                     (searchX != -1 && searchY != -1 && searchX == x && searchY == y); // By pos
         }
 

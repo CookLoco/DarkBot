@@ -10,6 +10,7 @@ public class Gui extends Updatable {
     public long addressInfo;
 
     public boolean visible;
+    protected boolean isTweening; // If it's in the middle of an animation
 
     protected Point pos;
     protected Point size;
@@ -55,6 +56,8 @@ public class Gui extends Updatable {
         // API.readMemoryBoolean(addressInfo + 40); // Maximized changed (set to true when toggling maximized)
         // API.readMemoryBoolean(addressInfo + 44); // Settings on server
         // API.readMemoryBoolean(addressInfo + 48); // show on top
+
+        isTweening = API.readMemoryBoolean(address + 0xC4);
     }
 
     @Override
@@ -84,6 +87,10 @@ public class Gui extends Updatable {
         API.mouseClick(x + plusX, y + plusY);
     }
 
+    public void hover(int plusX, int plusY) {
+        API.mouseMove(x + plusX, y + plusY);
+    }
+
     public boolean show(boolean value) {
         if (trySetShowing(value)) {
             if (minimized.address != 0) API.mouseClick((int) minimized.x + 5, (int) minimized.y + 5);
@@ -105,7 +112,7 @@ public class Gui extends Updatable {
     }
 
     public boolean isAnimationDone() {
-        return System.currentTimeMillis() - 1500 > time;
+        return !isTweening && System.currentTimeMillis() - 1000 > time;
     }
 
 }

@@ -8,12 +8,13 @@ import com.github.manolo8.darkbot.config.types.Tag;
 import com.github.manolo8.darkbot.config.types.TagDefault;
 import com.github.manolo8.darkbot.config.types.suppliers.LanguageSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
+import com.github.manolo8.darkbot.config.types.suppliers.PetGearSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ReviveSpotSupplier;
+import com.github.manolo8.darkbot.core.manager.PetManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.tree.components.JActionTable;
 import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
-import com.github.manolo8.darkbot.gui.tree.components.JFileOpener;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
 import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
@@ -139,16 +140,18 @@ public class Config {
     public @Option PetSettings PET = new PetSettings();
     public static class PetSettings {
         public @Option boolean ENABLED = false;
-        public @Option @Num(max = 8, step = 1) int MODULE = 1;
+        public @Deprecated int MODULE = 0; // Kept so plugins using it don't just break. They'll just be unable to use pet.
+        public @Option(value = "Legacy mode (old plugin compatibility)", description = "Enable if an older plugin is managing pet. The new pet selector becomes useless.") boolean COMPATIBILITY_MODE = false;
+        public @Option @Editor(JListField.class) @Options(PetGearSupplier.class) int MODULE_ID = 1;
     }
 
     public @Option GroupSettings GROUP = new GroupSettings();
     public static class GroupSettings {
         public @Option boolean ACCEPT_INVITES = false;
-        public @Option @Editor(JPlayerTagField.class) @Tag(TagDefault.ALL) PlayerTag WHITELIST_TAG = null;
-        public @Option @Editor(JPlayerTagField.class) @Tag(TagDefault.NONE) PlayerTag INVITE_TAG = null;
+        public @Option @Tag(TagDefault.ALL) PlayerTag WHITELIST_TAG = null;
+        //public @Option @Tag(TagDefault.NONE) PlayerTag INVITE_TAG = null;
         public @Option boolean OPEN_INVITES = false;
-        public @Option @Editor(JPlayerTagField.class) @Tag(TagDefault.NONE) PlayerTag KICK_TAG = null;
+        //public @Option @Tag(TagDefault.NONE) PlayerTag KICK_TAG = null;
     }
 
     public @Option Miscellaneous MISCELLANEOUS = new Miscellaneous();
@@ -177,7 +180,6 @@ public class Config {
             public @Option @Num(max = 300, step = 1) int TRAIL_LENGTH = 15;
             public @Option boolean SHOW_ZONES = true;
             public @Option @Num(min = 1, max = 20, step = 1) int BUTTON_SIZE = 4;
-            public @Option boolean HIDE_EDITORS = false;
 
             public boolean ALWAYS_ON_TOP = true; // No @Option. Edited via button
         }

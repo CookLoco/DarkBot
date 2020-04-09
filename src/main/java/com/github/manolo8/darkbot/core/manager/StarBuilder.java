@@ -3,8 +3,6 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.objects.Map;
 import org.jgrapht.Graph;
-import org.jgrapht.graph.AsUndirectedGraph;
-import org.jgrapht.graph.AsUnmodifiableGraph;
 import org.jgrapht.graph.DirectedPseudograph;
 
 import java.util.ArrayList;
@@ -47,10 +45,19 @@ public class StarBuilder {
         private int type;
         private boolean looped;
         private String[] maps;
+        private int x, y;
         private String targetMap = current.name;
 
         public GGPort(int type, boolean looped, String[] maps) {
             this.type = type;
+            this.x = this.y = -1;
+            this.looped = looped;
+            this.maps = maps;
+        }
+        public GGPort(int type, int x, int y, boolean looped, String[] maps) {
+            this.type = type;
+            this.x = x;
+            this.y = y;
             this.looped = looped;
             this.maps = maps;
         }
@@ -106,10 +113,25 @@ public class StarBuilder {
     }
 
     /**
+     * Adds a type portal to jump to the gate, from one of the maps, and also includes itself (Like most ggs).
+     */
+    protected StarBuilder accessBy(int type, int x, int y, String... maps) {
+        this.ggPorts.add(new GGPort(type, x, y, true, maps));
+        return this;
+    }
+
+    /**
      * Adds a type portal to jump to the gate, from one of the maps, but won't be able to jump from itself (Special cases).
      */
     protected StarBuilder accessOnlyBy(int type, String... maps) {
         this.ggPorts.add(new GGPort(type, false, maps));
+        return this;
+    }
+    /**
+     * Adds a type portal to jump to the gate, from one of the maps, but won't be able to jump from itself (Special cases).
+     */
+    protected StarBuilder accessOnlyBy(int type, int x, int y, String... maps) {
+        this.ggPorts.add(new GGPort(type, x, y, false, maps));
         return this;
     }
 
@@ -141,8 +163,8 @@ public class StarBuilder {
             Map gg = mapsByName.get(ggPort.targetMap);
             if (ggPort.looped) graph.addEdge(gg, gg, new Portal(ggPort.type, -1, -1, gg, -1));
             for (String mapName : ggPort.maps) {
-                Map from = mapsByName.get(mapName), to = mapsByName.get(ggPort.targetMap);
-                graph.addEdge(from, to, new Portal(ggPort.type, -1, -1, gg, -1));
+                Map from = mapsByName.get(mapName);
+                graph.addEdge(from, gg, new Portal(ggPort.type, ggPort.x, ggPort.y, gg, -1));
             }
         }
         return graph;
